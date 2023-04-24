@@ -15,7 +15,7 @@
 	<name>bookStore</name>
 	<description>bookStore</description>
 	<properties>
-		<java.version>17</java.version>
+		<java.version>16</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -46,12 +46,13 @@
 	</dependencies>
 
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+  <plugins>
+    <plugin>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-maven-plugin</artifactId>
+    </plugin>
+  </plugins>
+</build>
+
 
 </project>
