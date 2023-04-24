@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>All Book</title>
+<th:block th:include=".././static/admin/allCss.html"></th:block>
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/v/bs4/dt-1.11.4/datatables.min.css" />
+<style type="text/css">
+a {
+	color: white;
+}
+
+a:hover {
+	text-decoration: none;
+	color: #17a2b8;
+}
+
+.btn-info:hover {
+	background-color: white !important;
+}
+</style>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/admin/navbar.html"></th:block>
+	<div class="row">
+		<div class="col-md-10 text-center">
+			<h3>ALL BOOK</h3>
+			<div th:if="${param.updateSuccess != null}"
+				class="text-center text-success">
+				<p th:if="${param.updateSuccess}">Book Update Success</p>
+			</div>
+			<div th:if="${param.delSuccess != null}"
+				class="text-center text-success">
+				<p th:if="${param.delSuccess}">Book Delete Success</p>
+			</div>
+		</div>
+		<div class="col-md-2 text-right">
+			<button type="button" class="btn btn-info"
+				style="margin: 2px 15px; background-color: #0376b8;">
+				<a th:href="@{/adminHome/addBook}">ADD BOOK</a>
+			</button>
+		</div>
+	</div>
+	<div class="table-responsive">
+		<table class="table" id="booksTable">
+			<thead class="thead-dark">
+				<tr>
+					<th scope="col">ID</th>
+					<th scope="col">Book Name</th>
+					<th scope="col">Image</th>
+					<th scope="col">Price</th>
+					<th scope="col">Author</th>
+					<th scope="col">Category</th>
+					<th scope="col">Stock</th>
+					<th scope="col">Quantity</th>
+					<th scope="col">Publisher</th>
+					<th scope="col">Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="book, iStat : ${books}">
+					<th scope="row" th:utext="${book.getId()}"></th>
+					<td th:utext="${book.getName()}"></td>
+					<td><img th:src="@{/image/} + ${book.getImage()}"
+						class="card-img" alt="" style="width: 50px; height: 50px;"></td>
+					<td><span th:utext="${formattedPrices[__${iStat.index}__]}"></span>đ</td>
+					<td th:utext="${book.getAuthor_name()}"></td>
+					<td th:utext="${book.getCategory_name()}"></td>
+					<td th:utext="${book.getStock_name()}"></td>
+					<td th:utext="${book.getQuantity()}"></td>
+					<td th:utext="${book.getPublisher_name()}"></td>
+					<td><a class="btn btn-sm btn-primary"
+						th:href="@{|/adminHome/editBook?id=${book.getId()}|}" style="margin-bottom: 4px">Edit<i
+							class="fa-solid fa-pen-to-square ml-1"></i></a> <a
+						class="btn btn-sm btn-danger"
+						th:href="'http://localhost:8080/api/book/delBook/' + ${book.id}">Delete<i
+							class="fa-solid fa-delete-left ml-1"></i></a></td>
+				</tr>
+
+			</tbody>
+		</table>
+	</div>
+	<div style="margin-top: 248px">
+		<th:block th:include=".././static/admin/footer.html"></th:block>
+	</div>
+
+	<!-- Code javascript -->
+	<script type="text/javascript"
+		src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript"
+		src="https://cdn.datatables.net/v/bs4/dt-1.11.4/datatables.min.js"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#booksTable').DataTable({
+				"pageLength" : 20,
+				"lengthChange" : false, // Bỏ phần "Show entries"
+				"columnDefs" : [ {
+					"orderable" : false,
+					"targets" : [ 2, 9 ]
+				} // Bỏ phần sắp xếp cho cột "Image" và "Action"
+				]
+			});
+		});
+	</script>
+
+</body>
+</html>

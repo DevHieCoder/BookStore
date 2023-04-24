@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<th:block th:fragment="addNavbar"></th:block>
+</head>
+<body>
+	<div class="container-fluid"
+		style="height: 10px; background-color: #0376b8"></div>
+
+	<div class="container-fluid p-3 bg-light"
+		th:with="userNameParam=${param.userName}">
+
+		<div class="row">
+			<div class="col-md-3 text-success">
+				<h3>
+					<i class="fa-solid fa-book"></i> <a
+						th:href="@{/home} + ${userNameParam != null ? '?userName=' + userNameParam : ''}"
+						style="font-size: 32px">BookStore</a>
+				</h3>
+			</div>
+			<div class="col-md-6">
+				<form class="form-inline" th:action="@{/home/searchResults}"
+					method="get">
+					<input type="hidden" name="userName" th:value="${userNameParam}">
+					<input class="form-control mr-sm-2" type="search" name="searchName"
+						placeholder="Search" aria-label="Search" required>
+					<button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
+				</form>
+
+			</div>
+			<div class="col-m-3" th:if="${#strings.isEmpty(param.userName)}">
+				<a th:href="@{/home/login}" class="btn btn-success"> <i
+					class="fa-solid fa-right-to-bracket mr-1"></i>Login
+				</a> <a th:href="@{/home/register}" class="btn btn-primary text-white">
+					<i class="fa-solid fa-user-plus mr-1"></i>Register
+				</a>
+			</div>
+
+			<div class="col-m-3" th:if="${!#strings.isEmpty(param.userName)}">
+				<a th:href="@{/home/userSetting} + ${userNameParam != null ? '?userName=' + userNameParam : ''}" class="btn btn-success" style="color: #ffff"> <i
+					class="fa-solid fa-user mr-1"></i><span th:text="${param.userName}"></span>
+				</a> <a data-toggle="modal" data-target="#exampleModal" href=""
+					class="btn btn-primary text-white"> <i
+					class="fa-solid fa-right-from-bracket mr-1"></i>Logout
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<nav class="navbar navbar-expand-lg navbar-dark bg-custom">
+		<a class="navbar-brand" href="#"><i class="fa-solid fa-house"></i></a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse"
+			data-target="#navbarSupportedContent"
+			aria-controls="navbarSupportedContent" aria-expanded="false"
+			aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div class="collapse navbar-collapse" id="navbarSupportedContent" th:with="userNameParam=${param.userName}">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item active"><a class="nav-link" href="/home"
+					onclick="addUserNameParam(this)">Home</a></li>
+				<li class="nav-item active"><a class="nav-link"
+					th:href="@{/home/allbooks}" onclick="addUserNameParam(this)"><i
+						class="fa-solid fa-book-open"></i> All Books</a></li>
+				<li class="nav-item dropdown active"><a
+					class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+					role="button" data-toggle="dropdown" aria-haspopup="true"
+					aria-expanded="false"> <i class="fa-solid fa-book"></i>
+						Categories
+				</a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<a class="dropdown-item" th:href="@{/home/Classic Books}"
+							onclick="addUserNameParam(this)">Classic Books</a> <a
+							class="dropdown-item" th:href="@{/home/Romance}"
+							onclick="addUserNameParam(this)">Romance</a> <a
+							class="dropdown-item" th:href="@{/home/Thrillers}"
+							onclick="addUserNameParam(this)">Thrillers</a> <a
+							class="dropdown-item" th:href="@{/home/Kids}"
+							onclick="addUserNameParam(this)">Kids</a>
+					</div></li>
+			</ul>
+			<div class="col-m-3" th:if="${param.userName != null}">
+				<form class="form-inline my-2 my-lg-0">
+					<a th:href="@{/home/userSetting} + ${userNameParam != null ? '?userName=' + userNameParam : ''}" class="btn btn-light my-2 my-sm-0 mr-2"> <i
+						class="fa-solid fa-address-book"></i> User Setting
+					</a> <a th:href="@{/cart(userName=${param.userName})}"
+						class="btn btn-light my-2 my-sm-0"> <i
+						class="fa-solid fa-cart-shopping"></i> Cart
+					</a>
+				</form>
+			</div>
+
+		</div>
+	</nav>
+
+	<!-- Modal -->
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+		aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Logout</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="text-center">
+						<h4>Do you want logout ?</h4>
+						<button type="button" class="btn btn-secondary"
+							data-dismiss="modal">Close</button>
+						<a th:href="@{/home}" type="button" class="btn btn-primary" id="logoutButton">Logout</a>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		function addUserNameParam(linkElement) {
+			const urlParams = new URLSearchParams(window.location.search);
+			const userName = urlParams.get("userName");
+
+			if (userName) {
+				const href = linkElement.getAttribute("href");
+				linkElement.setAttribute("href", href + "?userName="
+						+ encodeURIComponent(userName));
+			}
+		}
+		
+		/* Test */
+		function deleteCookie(name) {
+			  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+			}
+
+		function handleLogout() {
+			  deleteCookie('email');
+
+			  window.location.href = "/home";
+			}
+		document.getElementById('logoutButton').addEventListener('click', handleLogout);
+
+
+	</script>
+
+</body>
+</html>

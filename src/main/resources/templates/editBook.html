@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Edit Book</title>
+<th:block th:include=".././static/admin/allCss.html"></th:block>
+<style>
+.hidden {
+	display: none;
+}
+</style>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/admin/navbar.html"></th:block>
+	<div class="container">
+		<h4 class="text-center">Edit Book</h4>
+		<div th:if="${param.fail != null}" class="text-center text-danger">
+			<p th:if="${param.fail}">Book already exist</p>
+		</div>
+		<form
+			th:action="'http://localhost:8080/api/book/updateBook/' + ${book.id}"
+			method="post" enctype="multipart/form-data">
+			<!--=========== BOOK INFO ===========-->
+			<h4 class="my-4">Book Information</h4>
+			<div class="form-row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label for="bookName">Book Name</label> <input type="text"
+							name="bookName" class="form-control" id="bookName"
+							aria-describedby="emailHelp" th:value="${book.name}">
+					</div>
+					<div class="form-group">
+						<label for="bookPrice">Book Price</label> <input type="number"
+							step="0.01" name="bookPrice" class="form-control" id="bookPrice"
+							th:value="${book.price}">
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label for="author">Book Author</label> <input type="text"
+							name="authorName" class="form-control" id="author"
+							th:value="${book.author_name}">
+					</div>
+					<div class="form-group">
+						<label for="category">Book Category</label> <input type="text"
+							name="categoryName" class="form-control" id="category"
+							aria-describedby="emailHelp" th:value="${book.category_name}">
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="description">Description</label>
+				<textarea class="form-control" name="bookDescription"
+					id="description" rows="3" th:utext="${book.description}"></textarea>
+			</div>
+			<div class="form-group">
+				<label for="stock">Stock</label> <select class="form-control"
+					id="stock" name="stockName">
+					<option th:utext="${book.stock_name}"></option>
+					<option th:value="${stock.getName()}" th:each="stock : ${stocks}"
+						th:utext="${stock.getName()}"></option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label for="quantity">Quantity</label> <input type="number"
+					class="form-control" name="quantity" id="quantity"
+					th:value="${book.quantity}">
+			</div>
+			<div class="form-group">
+				<label for="publisherExist">Publisher</label> <select
+					class="form-control" id="publisherExist" name="publisherExist">
+					<option th:utext="${book.publisher_name}"></option>
+					<option th:value="${publisher.getPublisherName()}"
+						th:each="publisher : ${publishers}"
+						th:utext="${publisher.getPublisherName()}"></option>
+				</select>
+			</div>
+			<!--=========== PUBLISHER INFO ===========-->
+			<button type="button" class="btn btn-secondary mb-3"
+				onclick="togglePublisherFields()">Add New Publisher</button>
+			<div id="publisher-fields" class="hidden">
+				<h4>Publisher Information</h4>
+				<div class="form-row">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label for="publisherName">Publisher Name</label> <input
+								type="text" name="publisherName" class="form-control"
+								id="publisherName" placeholder="Name" disabled>
+						</div>
+						<div class="form-group">
+							<label for="email">Publisher Email</label> <input type="email"
+								name="publisherEmail" class="form-control" id="email"
+								placeholder="Email" disabled>
+						</div>
+						<div class="form-group">
+							<label for="address">Publisher Address</label> <input type="text"
+								name="publisherAddress" class="form-control" id="address"
+								placeholder="Address" disabled>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<label for="phone">Publisher Phone</label> <input type="tel"
+								name="publisherPhone" class="form-control" id="phone"
+								placeholder="Phone" disabled>
+						</div>
+						<div class="form-group">
+							<label for="country">Publisher Country</label> <input type="text"
+								name="publisherCountry" class="form-control" id="country"
+								placeholder="Country" disabled>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="form-group col-4 pl-0">
+				<label for="image">Image</label> <input type="file" name="image"
+					class="form-control-file" id="image">
+			</div>
+			<input type="hidden" name="addNewPublisher" id="addNewPublisher"
+				value="false">
+			<button type="submit" class="btn btn-primary btn-lg btn-block">Confirm</button>
+		</form>
+	</div>
+	<div style="margin-top: 100px">
+		<th:block th:include=".././static/admin/footer.html"></th:block>
+	</div>
+
+	<!-- Code javascript -->
+	<script>
+		function togglePublisherFields() {
+			var publisherFields = document.getElementById("publisher-fields");
+			var publisherExist = document.getElementById("publisherExist");
+			var publisherLabel = document
+					.querySelector("label[for='publisherExist']"); // Add this line
+			var addNewPublisherInput = document
+					.getElementById("addNewPublisher");
+			var publisherInputs = document
+					.querySelectorAll("#publisher-fields input");
+
+			if (publisherFields.classList.contains("hidden")) {
+				publisherFields.classList.remove("hidden");
+				publisherExist.style.display = "none";
+				publisherLabel.style.display = "none"; // Add this line
+				addNewPublisherInput.value = "true";
+				publisherInputs.forEach(function(input) {
+					input.disabled = false;
+				});
+			} else {
+				publisherFields.classList.add("hidden");
+				publisherExist.style.display = "block";
+				publisherLabel.style.display = "block"; // Add this line
+				addNewPublisherInput.value = "false";
+				publisherInputs.forEach(function(input) {
+					input.disabled = true;
+				});
+			}
+		}
+	</script>
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+		integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.1/dist/umd/popper.min.js"></script>
+</body>
+</html>

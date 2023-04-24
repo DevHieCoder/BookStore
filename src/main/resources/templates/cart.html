@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>All Books</title>
+<th:block th:include=".././static/component/allCSS.html"></th:block>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/component/navbar.html"></th:block>
+
+	<div style="margin: 0 30px;">
+		<div class="row">
+			<div class="col-md-6">
+				<h3 class="text-center">Your Item</h3>
+				<div class="card bg-white">
+					<div class="card-body">
+						<table class="table">
+							<thead>
+								<tr>
+									<th scope="col">Book Name</th>
+									<th scope="col">Image</th>
+									<th scope="col">Author</th>
+									<th scope="col">Quantity</th>
+									<th scope="col">Price</th>
+									<th scope="col">Action</th>
+								</tr>
+							</thead>
+							<tbody id="cartItems">
+								<tr th:each="book : ${booksInCart}">
+									<td th:utext="${book.name}"></td>
+									<td><img th:src="@{/image/} + ${book.image}"
+										style="width: 50px; height: 70px" /></td>
+									<td th:utext="${book.authorName}"></td>
+									<td><input type="number" class="form-control" min="1"
+										style="width: 70px"
+										onchange="updateQuantity(this, '${userName}')"
+										th:value="${book.quantity}"></td>
+									<td th:utext="${book.price}"></td>
+									<td><a onclick="removeFromCart(this, '${userName}')"
+										class="btn btn-sm btn-danger" style="color: white"> Remove<i
+											class="fa-solid fa-delete-left ml-1"></i>
+									</a></td>
+								</tr>
+							</tbody>
+							<tfoot>
+								<tr>
+									<th colspan="3">Total Price</th>
+									<th colspan="2" id="totalPrice">0đ</th>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-6">
+				<h3 class="text-center">Customer Information</h3>
+				<div class="card bg-white">
+					<div class="card-body" th:with="userNameParam=${param.userName}">
+						<form action="http://localhost:8080/api/order" method="post"
+							onsubmit="return checkCartNotEmpty()">
+							<div class="form-row">
+								<div class="form-group col-md-6">
+									<label for="nameCustomer">Full Name</label> <input type="text"
+										class="form-control" id="nameCustomer" name="customerName"
+										placeholder="Full Name" th:value="${customer.full_name}">
+								</div>
+								<div class="form-group col-md-6">
+									<label for="phoneCustomer">Phone Number</label> <input
+										type="tel" class="form-control" name="phoneCustomer"
+										id="phoneCustomer" placeholder="Phone Number" pattern="[0-9]*"
+										th:value="${customer.phone_number}">
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="email">Email</label> <input type="email"
+									class="form-control" id="email" name="email"
+									th:value="${user.email}" placeholder="Email" readonly>
+							</div>
+							<div class="form-group">
+								<label for="delivery_address">Delivery Address</label> <input
+									type="text" class="form-control" name="address"
+									id="deliveryAddress" placeholder="Address"
+									th:value="${customer.address}">
+							</div>
+							<div class="form-group">
+								<h5>Payment methods</h5>
+								<select class="form-control" id="payment-method"
+									onchange="showCreditCardNumber()" name="optionPayment" required>
+									<option value="" disabled selected>----Select----</option>
+									<option value="credit_card">Payment by credit card</option>
+									<option value="on_delivery">Payment on delivery</option>
+									<option value="paypal">Payment with PayPal</option>
+								</select>
+							</div>
+							<div class="form-group" id="credit-card-number"
+								style="display: none;">
+								<label for="creditCardNumber">CreditCard Number</label> <input
+									type="text" class="form-control" id="creditCardNumber"
+									placeholder="Credit Card Number" name="creditCardNumber">
+							</div>
+							<a
+								th:href="@{/home} + ${userNameParam != null ? '?userName=' + userNameParam : ''}"
+								class="btn btn-success" style="width: 100%; padding: 10px;">Continue
+								Shopping</a> <input type="hidden" id="booksInCartJson"
+								name="booksInCartJson" value=""> <input type="hidden"
+								id="totalPriceInput" name="totalPrice" value=""> <input
+								type="hidden" id="bookQuantitiesJson" name="bookQuantitiesJson"
+								value="">
+							<button type="submit" class="btn btn-primary"
+								style="width: 100%; padding: 10px; margin-top: 10px">Purchase</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- modal cart empty -->
+	<div class="modal fade" id="emptyCartModal" tabindex="-1" role="dialog"
+		aria-labelledby="emptyCartModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="emptyCartModalLabel">Empty Cart</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">Your cart is empty. Please add some
+					products before purchasing.</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Code javascript -->
+	<script src="https://www.paypal.com/sdk/js?client-id=Aef1dc-jJiIrfX_keE7sl25hB5fchDJYT_1poKP3iW27tGv0jVMnQGx7qmQaexJx0_h34cszBQZe8gjc"></script>
+	
+	<script>
+function showCreditCardNumber() {
+const paymentMethod = document.getElementById("payment-method").value;
+const creditCardNumber = document.getElementById("credit-card-number");
+
+if (paymentMethod === "credit_card") {
+	creditCardNumber.style.display = "block";
+	} else {
+		creditCardNumber.style.display = "none";
+	}
+
+const paypalButtonContainer = document.getElementById("paypal-button-container");
+
+if (paymentMethod === "paypal") {
+    creditCardNumber.style.display = "none";
+    paypalButtonContainer.style.display = "block";
+    initPayPalButton();
+} else {
+    paypalButtonContainer.style.display = "none";
+}
+}
+		
+function removeFromCart(element, userName) {
+    const bookId = element.closest('tr').getAttribute('data-book-id');
+    const key = 'booksInCart_' + userName;
+    let cartItems = JSON.parse(localStorage.getItem(key)) || [];
+
+    cartItems = cartItems.filter(book => book.id !== bookId);
+    localStorage.setItem(key, JSON.stringify(cartItems));
+
+    loadCartItems(userName);
+}
+function updateQuantity(element, userName) {
+    const newQuantity = element.value;
+    const bookId = element.closest('tr').getAttribute('data-book-id');
+    const key = 'booksInCart_' + userName;
+    let cartItems = JSON.parse(localStorage.getItem(key)) || [];
+
+    cartItems = cartItems.map(book => {
+        if (book.id === bookId) {
+            book.quantity = newQuantity;
+        }
+        return book;
+    });
+
+    localStorage.setItem(key, JSON.stringify(cartItems));
+    loadCartItems(userName);
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const userName = getParameterByName('userName');
+    loadCartItems(userName);
+});
+function loadCartItems(userName) {
+	const key = 'booksInCart_' + userName;
+    const cartItems = JSON.parse(localStorage.getItem(key)) || [];
+    const cartItemsTable = document.getElementById('cartItems');
+    const totalPriceElement = document.getElementById('totalPrice');
+    const bookNames = cartItems.map(book => book.name);
+    const bookNamesJson = JSON.stringify(bookNames);
+    const bookQuantities = cartItems.map(book => book.quantity);
+    const bookQuantitiesJson = JSON.stringify(bookQuantities);
+    // Clear the table first
+    cartItemsTable.innerHTML = '';
+
+    // Calculate the total price
+    let totalPrice = 0;
+
+    cartItems.forEach((book, index) => {
+        const newRow = cartItemsTable.insertRow();
+        newRow.setAttribute('data-book-id', book.id);
+        
+        newRow.innerHTML = `
+            <td>${book.name}</td>
+            <td><img src="/image/${book.image}" style="width: 50px; height: 70px" /></td>
+            <td>${book.author}</td>
+            <td>
+            <input type="number" class="form-control" min="1" style="width: 70px" onchange="updateQuantity(this, '${userName}')" value="${bookQuantities[index]}">
+        </td>
+            <td>${book.price}đ</td>
+            <td>
+                <a onclick="removeFromCart(this, '${userName}')" class="btn btn-sm btn-danger" style="color: white">
+                    Remove<i class="fa-solid fa-delete-left ml-1"></i>
+                </a>
+            </td>
+        `;
+
+        // Remove the comma and parse the price as a float
+        const priceWithoutComma = parseFloat(book.price.replace(/,/g, ''));
+        totalPrice += priceWithoutComma * parseInt(book.quantity);
+    });
+
+    // Format the total price with a comma as the thousand separator
+    const formattedTotalPrice = totalPrice.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+
+    totalPriceElement.innerText = `${formattedTotalPrice}đ`;
+    document.getElementById('booksInCartJson').value = bookNamesJson;
+    document.getElementById('totalPriceInput').value = totalPrice;
+    document.getElementById('booksInCartJson').value = bookNamesJson;
+    document.getElementById('bookQuantitiesJson').value = bookQuantitiesJson;
+    document.getElementById('totalPriceInput').value = totalPrice;
+}
+
+function clearCart(userName) {
+    const key = 'booksInCart_' + userName;
+    localStorage.removeItem(key);
+}
+
+function checkCartNotEmpty() {
+    // Lấy thông tin người dùng từ URL
+    const userName = getParameterByName('userName');
+    const key = 'booksInCart_' + userName;
+    const cartItems = JSON.parse(localStorage.getItem(key)) || [];
+
+    // Nếu giỏ hàng trống, hiển thị thông báo và ngăn chặn việc submit form
+    if (cartItems.length === 0) {
+        $('#emptyCartModal').modal('show');
+        return false;
+    } else {
+        clearCart(userName);
+        return true;
+    }
+}
+
+function getParameterByName(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    const results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+function initPayPalButton() {
+    // Render the PayPal button
+    paypal.Buttons({
+        style: {
+            shape: 'rect',
+            color: 'gold',
+            layout: 'vertical',
+            label: 'paypal',
+        },
+        createOrder: function(data, actions) {
+            // Set up the transaction
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        currency_code: 'USD', // Set your currency here
+                        value: document.getElementById('totalPriceInput').value
+                    }
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            // Capture the funds from the transaction
+            return actions.order.capture().then(function(details) {
+                // Show a success message to your buyer
+                alert('Transaction completed by ' + details.payer.name.given_name + '!');
+
+                // Clear the cart and refresh the page
+                clearCart(userName);
+                location.reload();
+            });
+        },
+        onError: function(err) {
+            // Show an error message
+            console.error('Error:', err);
+            alert('An error occurred during the transaction. Please try again.');
+        }
+    }).render('#paypal-button-container');
+}
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Orders</title>
+<th:block th:include=".././static/staff/allCss.html"></th:block>
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
+<style type="text/css">
+.dataTables_filter input[type="search"] {
+	background-color: #fff;
+}
+</style>
+</head>
+<body style="background-color: #f0f1f2;">
+	<th:block th:include=".././static/staff/navbar.html"></th:block>
+	<div class="container-fluid">
+		<h2 class="text-center">Your Orders</h2>
+		<table id="ordersTable" class="table table-striped table-bordered">
+
+			<thead class="bg-primary text-white">
+				<tr>
+					<th scope="col">Order ID</th>
+					<th scope="col">Book Name</th>
+					<th scope="col">Price</th>
+					<th scope="col">Quantity</th>
+					<th scope="col">Order Date</th>
+					<th scope="col">Shipping Address</th>
+					<th scope="col">Payment Method</th>
+					<th scope="col">Customer Name</th>
+					<th scope="col">Total Amount</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				<th:block th:each="order, iterStat : ${orders}">
+					<tr>
+						<th scope="row" th:utext="${order.getId()}"></th>
+						<td th:utext="${order.getName()}"></td>
+						<td><span th:utext="${order.getPrice()}"></span>đ</td>
+						<td th:utext="${order.getQuantity()}"></td>
+						<td th:utext="${order.getOrder_date()}"></td>
+						<td th:utext="${order.getShipping_address()}"></td>
+						<td th:utext="${order.getPayment_method()}"></td>
+						<td th:utext="${order.getFull_name()}"></td>
+						<td class="text-right font-weight-bold"
+							th:if="${iterStat.last || (iterStat.index + 1 < orders.length && orders[iterStat.index + 1].id != order.id)}">
+							Total Amount: <span th:utext="${order.getTotal_amount()}"></span>đ
+						</td>
+						<td
+							th:unless="${iterStat.last || (iterStat.index + 1 < orders.length && orders[iterStat.index + 1].id != order.id)}"
+							style="display: none;"></td>
+					</tr>
+				</th:block>
+			</tbody>
+
+		</table>
+	</div>
+
+	<!-- Code javascript -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript"
+		src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script th:inline="none">
+$(document).ready(function() {
+    // Khởi tạo DataTables
+    var table = $('#ordersTable').DataTable({
+        "pageLength": 10, // Số lượng ID đơn hàng tối đa trên mỗi trang
+        "info": false, // Ẩn dòng "Showing 1 to 9 of 9 entries"
+        "pagingType": "full_numbers", // Phân trang với số trang đầy đủ
+        "lengthChange": false, // Ẩn dòng "Show entries"
+        "columnDefs": [
+            { "orderable": false, "targets": [1, 2, 3, 5, 6, 8] } // Bỏ sắp xếp cho các cột đã chỉ định
+        ],
+        "drawCallback": function(settings) {
+            var api = this.api();
+            var rows = api.rows({page: 'current'}).nodes();
+            var last = null;
+
+            api.column(0, {page: 'current'}).data().each(function(group, i) {
+                if (last !== group) {
+                    $(rows).eq(i).before('<tr class="group"><td colspan="9">Order ID: ' + group + '</td></tr>');
+                    last = group;
+                }
+            });
+        }
+    });
+
+    // Tìm kiếm và sắp xếp
+    $('#ordersTable_filter input').on('keyup', function() {
+        table.search(this.value).draw();
+    });
+
+    // Ẩn các hàng tổng số tiền
+    $('.total-row').hide();
+});
+</script>
+</body>
+</html>

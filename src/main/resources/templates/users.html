@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>All User</title>
+<th:block th:include=".././static/admin/allCss.html"></th:block>
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/v/bs4/dt-1.11.4/datatables.min.css" />
+<style type="text/css">
+a {
+	color: white;
+}
+
+a:hover {
+	text-decoration: none;
+	color: #17a2b8;
+}
+
+.btn-info:hover {
+	background-color: white !important;
+}
+
+.show-password {
+	position: absolute;
+	right: 200px;
+	top: 50%;
+	transform: translateY(-50%);
+	cursor: pointer;
+	z-index: 2;
+}
+</style>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/admin/navbar.html"></th:block>
+	<div class="row">
+		<div class="col-md-10 text-center">
+			<h3>ALL User</h3>
+			<div th:if="${param.updateSuccess != null}"
+				class="text-center text-success">
+				<p th:if="${param.updateSuccess}">User Update Success</p>
+			</div>
+			<div th:if="${param.delSuccess != null}"
+				class="text-center text-success">
+				<p th:if="${param.delSuccess}">User Delete Success</p>
+			</div>
+		</div>
+		<div class="col-md-2 text-right">
+			<button type="button" class="btn btn-info"
+				style="margin: 2px 15px; background-color: #0376b8;">
+				<a th:href="@{/adminHome/addUser}">ADD User</a>
+			</button>
+		</div>
+	</div>
+	<div class="table-responsive">
+		<table class="table" id="booksTableUser">
+			<thead class="thead-dark">
+				<tr>
+					<th scope="col">ID</th>
+					<th scope="col">User Name</th>
+					<th scope="col">Password</th>
+					<th scope="col">Email</th>
+					<th scope="col">Role Name</th>
+					<th scope="col">Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="user : ${users}">
+					<th scope="row" th:utext="${user.getId()}"></th>
+					<td th:utext="${user.getUsername()}"></td>
+					<td style="position: relative;"><input type="password"
+						readonly th:value="${user.getPassword()}"
+						style="border: none; background: transparent;"> <i
+						class="fas fa-eye show-password"
+						onclick="togglePasswordVisibility(this)"></i></td>
+					<td th:utext="${user.getEmail()}"></td>
+					<td th:utext="${user.getRole_name()}"></td>
+					<td><a class="btn btn-sm btn-primary"
+						th:href="@{|/adminHome/updateUser?id=${user.getId()}|}">Edit<i
+							class="fa-solid fa-pen-to-square ml-1"></i></a> <a
+						class="btn btn-sm btn-danger"
+						th:href="'http://localhost:8080/api/user/delUser/' + ${user.id}">Delete<i
+							class="fa-solid fa-delete-left ml-1"></i></a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	
+	<!-- Code javascript -->
+	<script type="text/javascript"
+		src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript"
+		src="https://cdn.datatables.net/v/bs4/dt-1.11.4/datatables.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#booksTableUser').DataTable({
+				"pageLength" : 20,
+				"lengthChange" : false, // Bỏ phần "Show entries"
+				"columnDefs" : [ {
+					"orderable" : false,
+					"targets" : [ 2, 9 ]
+				} // Bỏ phần sắp xếp cho cột "Image" và "Action"
+				]
+			});
+		});
+		function togglePasswordVisibility(element) {
+			let passwordInput = element.previousElementSibling;
+			if (passwordInput.type === "password") {
+				passwordInput.type = "text";
+				element.classList.remove("fa-eye");
+				element.classList.add("fa-eye-slash");
+			} else {
+				passwordInput.type = "password";
+				element.classList.remove("fa-eye-slash");
+				element.classList.add("fa-eye");
+			}
+		}
+	</script>
+</body>
+</html>

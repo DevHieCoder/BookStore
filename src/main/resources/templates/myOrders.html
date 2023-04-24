@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Orders</title>
+<th:block th:include=".././static/component/allCss.html"></th:block>
+</head>
+<body style="background-color: #f0f1f2;">
+	<th:block th:include=".././static/component/navbar.html"></th:block>
+	<div class="container-fluid">
+	<h2 class="text-center">Your Orders</h2>
+		<table class="table table-striped table-bordered">
+  <thead class="bg-primary text-white">
+    <tr>
+      <th scope="col">Order ID</th>
+      <th scope="col">Book Name</th>
+      <th scope="col">Price</th>
+      <th scope="col">Quantity</th>
+      <th scope="col">Order Date</th>
+      <th scope="col">Shipping Address</th>
+      <th scope="col">Payment Method</th>
+      <th scope="col">Customer Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <th:block th:each="order, iterStat : ${orders}">
+      <tr>
+        <th scope="row" th:utext="${order.getId()}"></th>
+        <td th:utext="${order.getName()}"></td>
+        <td><span th:utext="${order.getPrice()}"></span>đ</td>
+        <td th:utext="${order.getQuantity()}"></td>
+        <td th:utext="${order.getOrder_date()}"></td>
+        <td th:utext="${order.getShipping_address()}"></td>
+        <td th:utext="${order.getPayment_method()}"></td>
+        <td th:utext="${order.getFull_name()}"></td>
+      </tr>
+      <tr th:if="${iterStat.last || (iterStat.index + 1 < orders.size() && orders[iterStat.index + 1].id != order.id)}">
+        <td colspan="7" class="text-right font-weight-bold">Total Amount:</td>
+        <td><span th:utext="${order.getTotal_amount()}"></span>đ</td>
+      </tr>
+    </th:block>
+  </tbody>
+</table>
+	</div>
+</body>
+</html>

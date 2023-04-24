@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>All Stock</title>
+<th:block th:include=".././static/admin/allCss.html"></th:block>
+<style type="text/css">
+a {
+	color: white;
+}
+
+a:hover {
+	text-decoration: none;
+	color: #17a2b8;
+}
+
+.btn-info:hover {
+	background-color: white !important;
+}
+</style>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/admin/navbar.html"></th:block>
+	<div class="row">
+		<div class="col-md-10 text-center">
+			<h3>ALL STOCK</h3>
+			<div th:if="${param.updateSuccess != null}"
+				class="text-center text-success">
+				<p th:if="${param.updateSuccess}">Stock Update Success</p>
+			</div>
+			<div th:if="${param.delSuccess != null}"
+				class="text-center text-success">
+				<p th:if="${param.delSuccess}">Stock Delete Success</p>
+			</div>
+		</div>
+		<div class="col-md-2 text-right">
+			<button type="button" class="btn btn-info"
+				style="margin: 2px 15px; background-color: #0376b8;">
+				<a th:href="@{/adminHome/addStock}">ADD STOCK</a>
+			</button>
+		</div>
+	</div>
+
+	<table class="table">
+		<thead class="thead-dark">
+			<tr>
+				<th scope="col">ID</th>
+				<th scope="col">Stock Name</th>
+				<th scope="col">Phone</th>
+				<th scope="col">Address</th>
+				<th scope="col">Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="stock : ${stocks}">
+				<th scope="row" th:utext="${stock.getId()}"></th>
+				<td th:utext="${stock.getName()}"></td>
+				<td th:utext="${stock.getPhone()}"></td>
+				<td th:utext="${stock.getAddress()}"></td>
+				<td><a class="btn btn-sm btn-primary"
+					th:href="@{|/adminHome/updateStock?id=${stock.getId()}|}">Edit<i
+						class="fa-solid fa-pen-to-square ml-1"></i></a> <a
+					class="btn btn-sm btn-danger"
+					th:href="'http://localhost:8080/api/stock/delStock/' + ${stock.id}">Delete<i
+						class="fa-solid fa-delete-left ml-1"></i></a></td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>

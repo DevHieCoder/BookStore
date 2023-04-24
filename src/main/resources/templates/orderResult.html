@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>OrderSuccess</title>
+<th:block th:include=".././static/component/allCSS.html"></th:block>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/component/navbar.html"></th:block>
+
+	<div class="container text-center mt-3" th:with="userNameParam=${param.userName}">
+		<i class="fas fa-check-circle fa-5x text-success"></i>	
+		<h1>Thank You</h1>
+		<h2>Your Order Successfully</h2>
+		<h5>With in 5 days your product will be delivered in your address</h5>
+		<a th:href="@{/home} + ${userNameParam != null ? '?userName=' + userNameParam : ''}" class="btn btn-primary mt-3">Home</a>
+		<a th:href="@{/home/myOrders} + ${userNameParam != null ? '?userName=' + userNameParam : ''}" class="btn btn-success mt-3" style="color: #ffff">View Order</a>
+	</div>
+
+</body>
+</html>

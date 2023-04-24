@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Home</title>
+<th:block th:include=".././static/component/allCSS.html"></th:block>
+<style type="text/css">
+.notification {
+	position: fixed;
+	top: 50%;
+	right: 20px;
+	transform: translateY(-50%);
+	background-color: #28a745;
+	color: white;
+	padding: 15px 25px;
+	border-radius: 5px;
+	font-size: 1.2em;
+	display: none;
+}
+</style>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/component/navbar.html"></th:block>
+	<div class="container-fluid back-img"></div>
+	<div th:each="category, categoryIndex : ${booksByCategory.keySet()}">
+		<div class="container">
+			<h3 class="text-center" th:utext="${category}"></h3>
+			<div class="row flex-container">
+				<div class="col-md-3"
+					th:each="book, iStat : ${booksByCategory.get(category)}">
+					<div class="card crd-ho">
+						<div class="card-body text-center">
+							<div th:with="username=${param.userName}"
+								th:attr="data-book-id=${book.getId()}, data-user-name=${username != null ? username : ''}"
+								onclick="navigateToBookDetail(this)">
+								<img th:src="@{/image/} + ${book.getImage()}"
+									style="width: 150px; height: 200px" class="img-thumblin">
+								<div class="card-container">
+									<p class="book-title text-ellipsis"
+										th:utext="${book.getName()}"></p>
+									<span class="text-ellipsis">Author: <span
+										th:utext="${book.getAuthor_name()}"></span></span> <span
+										class="text-ellipsis">Category: <span
+										th:utext="${book.getCategory_name()}"></span></span>
+								</div>
+								<p style="display: inline;">
+									<span style="display: inline;">Price: </span> 
+									<span th:text="${book.getPrice()}"></span>đ
+								</p>
+							</div>
+							<span
+								th:if="${bookQuantityMap.get(book.getId().toString()) == 0}"
+								style="color: red; font-weight: bold;">Hết hàng</span> <span
+								th:if="${bookQuantityMap.get(book.getId().toString()) != 0}"
+								style="visibility: hidden;">Hết hàng</span>
+							<div class="row text-center pt-3">
+								<div class="col-6" th:if="${param.userName == null}">
+									<a th:href="@{/home/login}" class="btn btn-danger btn-sm ml-1"
+										th:if="${bookQuantityMap.get(book.getId().toString()) != 0}"><i
+										class="fa-solid fa-cart-shopping"></i>Add cart</a>
+								</div>
+								<div class="col-6" th:if="${param.userName != null}">
+									<button onclick="addToCart(this)"
+										class="btn btn-danger btn-sm ml-1"
+										th:attr="data-book-id=${book.getId()}, data-book-name=${book.getName()}, data-book-image=${book.getImage()}, data-book-author=${book.getAuthor_name()},	data-book-price=${book.getPrice()}"
+							th:if="${bookQuantityMap.get(book.getId().toString()) != 0}">
+										<i class="fa-solid fa-cart-shopping"></i>Add cart
+									</button>
+								</div>
+								<div class="col-6">
+									<a style="color: #ffff" th:with="username=${param.userName}"
+										th:attr="data-book-id=${book.getId()}, data-user-name=${username != null ? username : ''}"
+										onclick="navigateToBookDetail(this)"
+										class="btn btn-success btn-sm ml-2">View Details</a>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="text-center mt-2">
+				<a th:with="username=${param.userName}"
+					th:href="@{/home/} + ${category} + ${username != null ? ('?userName=' + username) : ''}"
+					class="btn btn-danger btn-sm text-white">View All</a>
+			</div>
+
+		</div>
+		<hr>
+	</div>
+	<th:block th:include=".././static/component/footer.html"></th:block>
+
+	<!-- Message -->
+	<div id="notification" class="notification">Book added to cart.</div>
+
+	<script>
+		function navigateToBookDetail(element) {
+			const bookId = element.getAttribute('data-book-id');
+			const userName = element.getAttribute('data-user-name');
+			let url = '/home/bookDetail?id=' + bookId;
+			if (userName) {
+				url += '&userName=' + userName;
+			}
+			window.location.href = url;
+		}
+		function showToast() {
+			var notification = document.getElementById("notification");
+			notification.style.display = "block";
+			setTimeout(function() {
+				notification.style.display = "none";
+			}, 3000);
+		}
+
+		function addToCart(element) {
+	const userName = getParameterByName('userName');
+	const bookId = element.getAttribute('data-book-id');
+	const bookName = element.getAttribute('data-book-name');
+	const bookImage = element.getAttribute('data-book-image');
+	const bookAuthor = element.getAttribute('data-book-author');
+	const bookPrice = element.getAttribute('data-book-price');
+	
+	const book = {
+	    id: bookId,
+	    name: bookName,
+	    image: bookImage,
+	    author: bookAuthor,
+	    price: bookPrice,
+	    quantity: 1
+	};
+	
+	storeBookInLocalStorage(book, userName);
+	showToast();
+	}
+		function storeBookInLocalStorage(book, userName) {
+		    // Thay đổi khóa để kết hợp với userName, ví dụ: booksInCart_userName123
+		    let key = 'booksInCart_' + userName;
+		    let booksInCart = JSON.parse(localStorage.getItem(key)) || [];
+		    
+		    // Kiểm tra xem sách đã có trong giỏ hàng chưa
+		    let existingBookIndex = booksInCart.findIndex(item => item.id === book.id);
+
+		    // Nếu sách đã có trong giỏ hàng, cập nhật số lượng
+		    if (existingBookIndex !== -1) {
+		        booksInCart[existingBookIndex].quantity += book.quantity;
+		    } else {
+		        // Nếu sách chưa có trong giỏ hàng, thêm sách vào giỏ hàng
+		        booksInCart.push(book);
+		    }
+		    
+		    localStorage.setItem(key, JSON.stringify(booksInCart));
+		}
+
+		function getParameterByName(name, url) {
+			  if (!url) url = window.location.href;
+			  name = name.replace(/[\[\]]/g, '\\$&');
+			  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+			      results = regex.exec(url);
+			  if (!results) return null;
+			  if (!results[2]) return '';
+			  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+			}
+		
+	</script>
+
+</body>
+</html>

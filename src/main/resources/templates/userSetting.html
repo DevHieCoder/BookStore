@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>OrderSuccess</title>
+<th:block th:include=".././static/component/allCSS.html"></th:block>
+<style type="text/css">
+a {
+text-decoration: none;
+color: black;
+}
+a:hover {
+	text-decoration: none;
+}
+</style>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/component/navbar.html"></th:block>
+
+	<div class="container" th:with="userNameParam=${param.userName}">
+		<h1 class="text-center">Hello: <span th:text="${param.userName}"></span></h1>
+		<div class="row pt-5">
+			<div class="col-md-4 mt-3">
+				<a th:href="@{/home/changePassword} + ${userNameParam != null ? '?userName=' + userNameParam : ''}">
+					<div class="card">
+						<div class="card-body text-center">
+							<div class="text-warning">
+								<i class="fa-solid fa-key fa-3x"></i>							
+							</div>
+							<h3>Change The Password</h3>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div class="col-md-4 mt-3">
+				<a th:href="@{/home/editProfile} + ${userNameParam != null ? '?userName=' + userNameParam : ''}">
+					<div class="card">
+						<div class="card-body text-center">
+							<div class="text-primary">
+								<i class="fa-solid fa-address-card fa-3x"></i>							
+							</div>
+							<h3>Edit Profile</h3>
+						</div>
+					</div>
+				</a>
+			</div>
+			<div class="col-md-4 mt-3">
+				<a th:href="@{/home/myOrders} + ${userNameParam != null ? '?userName=' + userNameParam : ''}">
+					<div class="card">
+						<div class="card-body text-center">
+							<div class="text-danger">
+								<i class="fa-solid fa-box-open fa-3x"></i>							
+							</div>
+							<h3>My Orders</h3>
+						</div>
+					</div>
+				</a>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

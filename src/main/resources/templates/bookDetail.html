@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Book Detail</title>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
+<th:block th:include=".././static/component/allCSS.html"></th:block>
+<style>
+body {
+	font-family: Arial, sans-serif;
+}
+
+a {
+	color: black;
+}
+
+a:hover {
+	color: black;
+	text-decoration: none;
+}
+
+.card:hover {
+	cursor: pointer;
+}
+
+.book-title {
+	font-size: 24px;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+.book-author, .book-category {
+	font-size: 16px;
+	color: #777;
+}
+
+.book-price {
+	font-size: 24px;
+	font-weight: bold;
+	color: #d9534f;
+}
+
+.quantity-controls {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.quantity-controls button {
+	font-size: 18px;
+	padding: 5px 10px;
+}
+
+.add-to-cart {
+	background-color: #d9534f;
+	border-color: #d9534f;
+	color: #fff;
+	font-size: 18px;
+	font-weight: bold;
+	width: 100%;
+	padding: 10px;
+	border-radius: 5px;
+	margin-top: 10px;
+}
+
+.add-to-cart:hover {
+	background-color: #c9302c;
+	border-color: #c9302c;
+}
+
+.book-description {
+	border: 1px solid #eaeaea;
+	border-radius: 5px;
+	background-color: #fff;
+	padding: 20px;
+}
+
+.related-products {
+	margin-bottom: 60px;
+}
+
+.container {
+	background-color: rgba(255, 255, 255, 0.8);
+	padding: 20px;
+	border-radius: 10px;
+}
+
+.owl-carousel .item {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+}
+
+.owl-carousel .card {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	width: 100%;
+	height: 100%;
+}
+
+.owl-carousel .card-img-top {
+	width: auto;
+	max-width: 100%;
+	max-height: 200px;
+	object-fit: contain;
+	margin: 0 auto;
+}
+
+.owl-carousel .card-title {
+	height: 48px; /* Thêm chiều cao cố định */
+	margin-bottom: 0;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.owl-carousel .card-body {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 100px; /* Thêm chiều cao cố định */
+	text-align: center;
+}
+
+.btn-disabled {
+	background-color: #ccc;
+	border-color: #ccc;
+	color: #fff;
+	font-size: 18px;
+	font-weight: bold;
+	width: 100%;
+	padding: 10px;
+	border-radius: 5px;
+	margin-top: 10px;
+}
+</style>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/component/navbar.html"></th:block>
+	<div class="container mt-5">
+		<div class="row">
+			<div class="col-md-6">
+				<img th:src="@{/image/} + ${book.image}" class="img-fluid"
+					alt="Book image">
+			</div>
+			<div class="col-md-6">
+				<div class="book-info">
+					<h3 class="book-title" th:utext="${book.name}"></h3>
+					<p class="book-author" th:utext="${book.author_name}"></p>
+					<p class="book-category" th:utext="${book.category_name}"></p>
+					<p class="book-price"
+						th:text="'Price: ' + ${formattedPrices[0]} + đ"></p>
+					<div class="quantity-controls">
+						<button type="button" class="btn btn-outline-secondary"
+							onclick="decreaseQuantity()">-</button>
+						<input type="text" name="quantity"
+							class="form-control text-center"
+							style="background-color: #ffffff;" id="quantity" value="1"
+							readonly>
+						<button type="button" class="btn btn-outline-secondary"
+							onclick="increaseQuantity()">+</button>
+					</div>
+
+					<div th:if="${bookQuantityMap[id.toString()] == 0}">
+						<button type="button" class="btn btn-disabled" disabled>Hết
+							hàng</button>
+					</div>
+					<div th:if="${bookQuantityMap[id.toString()] != 0}">
+						<button onclick="addToCart(this)" class="btn add-to-cart mt-3"
+							th:attr="data-book-id=${book.getId()}, data-book-name=${book.getName()}, data-book-image=${book.getImage()}, data-book-author=${book.getAuthor_name()},	data-book-price=${book.getPrice()}"
+							th:if="${bookQuantityMap.get(book.getId().toString()) != 0}">Add
+							to Cart</button>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<div class="row mt-5">
+			<div class="col-md-12">
+				<div class="book-description">
+					<h4>Description</h4>
+					<p th:utext="${book.description}"></p>
+				</div>
+			</div>
+		</div>
+		<div class="row mt-5">
+			<div class="col-md-12 related-products">
+				<h4 style="text-align: center;">Related Products</h4>
+				<!-- Replace this part -->
+				<div class="owl-carousel owl-theme">
+					<div th:each="relatedBook : ${relatedProducts}" class="item">
+						<div class="card"
+							th:onclick="'navigateToBookDetail(\'/home/bookDetail?id=' + ${relatedBook.getId()} + '\')'">
+							<img th:src="@{/image/} + ${relatedBook.getImage()}"
+								class="card-img-top" alt="Related product image">
+							<div class="card-body">
+								<h5 class="card-title" th:utext="${relatedBook.getName()}">Related
+									Book</h5>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- End of replacement -->
+			</div>
+		</div>
+	</div>
+
+	<th:block th:include=".././static/component/footer.html"></th:block>
+
+	<!-- Cart Modal -->
+	<div class="modal fade" id="addToCartModal" tabindex="-1" role="dialog"
+		aria-labelledby="addToCartModalLabel" aria-hidden="true" th:with="userNameParam=${param.userName}">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="addToCartModalLabel">Book added to cart</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body text-center">
+					<a th:href="@{/home} + ${userNameParam != null ? '?userName=' + userNameParam : ''}" type="button" class="btn btn-primary">Continue Shopping</a>
+					<a th:href="@{/cart} + ${userNameParam != null ? '?userName=' + userNameParam : ''}" type="button" class="btn btn-success">Go to
+						Cart</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Code javascript -->
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			var owl = $(".owl-carousel");
+			owl.owlCarousel({
+				loop : true,
+				margin : 10,
+				nav : false, // Ẩn thanh điều hướng mặc định
+				responsive : {
+					0 : {
+						items : 1,
+					},
+					600 : {
+						items : 3,
+					},
+					1000 : {
+						items : 5,
+					},
+				},
+			});
+
+			// Thêm sự kiện click cho nút mũi tên trái
+			$(".custom-prev").click(function() {
+				owl.trigger("prev.owl.carousel");
+			});
+
+			// Thêm sự kiện click cho nút mũi tên phải
+			$(".custom-next").click(function() {
+				owl.trigger("next.owl.carousel");
+			});
+		});
+
+		function increaseQuantity() {
+			let currentQuantity = parseInt($('#quantity').val());
+			$('#quantity').val(currentQuantity + 1);
+		}
+
+		function decreaseQuantity() {
+			let currentQuantity = parseInt($('#quantity').val());
+			if (currentQuantity > 1) {
+				$('#quantity').val(currentQuantity - 1);
+			}
+		}
+		function navigateToBookDetail(url) {
+			window.location.href = url;
+		}
+		function addToCart(element) {
+		    const userName = getParameterByName('userName');
+
+		    if (userName === null || userName === '') {
+		        window.location.href = '/home/login';
+		        return;
+		    }
+
+		    const bookId = element.getAttribute('data-book-id');
+		    const bookName = element.getAttribute('data-book-name');
+		    const bookImage = element.getAttribute('data-book-image');
+		    const bookAuthor = element.getAttribute('data-book-author');
+		    const bookPrice = element.getAttribute('data-book-price');
+		    const quantity = parseInt(document.getElementById('quantity').value);
+
+		    const book = {
+		        id: bookId,
+		        name: bookName,
+		        image: bookImage,
+		        author: bookAuthor,
+		        price: bookPrice,
+		        quantity: quantity
+		    };
+
+		    storeBookInLocalStorage(book, userName); 
+		    showToast();
+		}
+
+		function storeBookInLocalStorage(book, userName) {
+		    // Thay đổi khóa để kết hợp với userName, ví dụ: booksInCart_userName123
+		    let key = 'booksInCart_' + userName;
+		    let booksInCart = JSON.parse(localStorage.getItem(key)) || [];
+		    
+		    // Kiểm tra xem sách đã có trong giỏ hàng chưa
+		    let existingBookIndex = booksInCart.findIndex(item => item.id === book.id);
+
+		    // Nếu sách đã có trong giỏ hàng, cập nhật số lượng
+		    if (existingBookIndex !== -1) {
+		        booksInCart[existingBookIndex].quantity += book.quantity;
+		    } else {
+		        // Nếu sách chưa có trong giỏ hàng, thêm sách vào giỏ hàng
+		        booksInCart.push(book);
+		    }
+		    
+		    localStorage.setItem(key, JSON.stringify(booksInCart));
+		}
+		function getParameterByName(name, url) {
+			  if (!url) url = window.location.href;
+			  name = name.replace(/[\[\]]/g, '\\$&');
+			  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+			      results = regex.exec(url);
+			  if (!results) return null;
+			  if (!results[2]) return '';
+			  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+			}
+		
+		function showToast() {
+			  $('#addToCartModal').modal('show');
+			}
+		function checkUserAndShowModal() {
+			  const userName = getParameterByName('userName');
+
+			  if (userName === null || userName === '') {
+			    window.location.href = '/home/login';
+			  } else {
+			    showToast();
+			  }
+			}
+
+	</script>
+</body>
+</html>

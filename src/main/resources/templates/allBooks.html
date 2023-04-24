@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>All Books</title>
+<th:block th:include=".././static/component/allCSS.html"></th:block>
+<style>
+.pagination {
+	display: inline-block;
+}
+
+.pagination a {
+	color: black;
+	float: left;
+	padding: 8px 16px;
+	text-decoration: none;
+	transition: background-color .3s;
+	border: 1px solid #ddd;
+}
+
+.pagination a:hover:not(.active) {
+	background-color: #ddd;
+}
+
+.pagination a.active {
+	background-color: #4CAF50;
+	color: white;
+	border: 1px solid #4CAF50;
+}
+
+.notification {
+	position: fixed;
+	top: 50%;
+	right: 20px;
+	transform: translateY(-50%);
+	background-color: #28a745;
+	color: white;
+	padding: 15px 25px;
+	border-radius: 5px;
+	font-size: 1.2em;
+	display: none;
+}
+</style>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/component/navbar.html"></th:block>
+	<div>
+		<div class="container text-center">
+			<h3>ALL BOOKS</h3>
+			<div class="form-group d-inline-block" style="margin-bottom: 20px;">
+    <label for="sort" class="d-inline-block mr-2">Sort by:</label>
+    <select class="form-control d-inline-block" id="sort" style="width: auto;">
+        <option value="name-asc">Name (A-Z)</option>
+        <option value="name-desc">Name (Z-A)</option>
+        <option value="price-asc">Price (Low to High)</option>
+        <option value="price-desc">Price (High to Low)</option>
+    </select>
+</div>
+
+
+			<div class="row flex-container" data-total-books="${books.length}">
+				<div class="col-md-3 book-card" th:each="book, iStat : ${books}">
+					<div class="card crd-ho mb-3">
+						<div class="card-body text-center">
+							<div th:with="username=${param.userName}"
+								th:attr="data-book-id=${book.getId()}, data-user-name=${username != null ? username : ''}"
+								onclick="navigateToBookDetail(this)">
+								<img th:src="@{/image/} + ${book.getImage()}"
+									style="width: 150px; height: 200px" class="img-thumblin">
+								<div class="card-container">
+									<p class="book-title text-ellipsis"
+										th:utext="${book.getName()}"></p>
+									<span class="text-ellipsis">Author: <span
+										th:utext="${book.getAuthor_name()}"></span></span> <span
+										class="text-ellipsis">Category: <span
+										th:utext="${book.getCategory_name()}"></span></span>
+								</div>
+								<p style="display: inline;">
+									<span style="display: inline;">Price: </span> <span
+										class="book-price"
+										th:utext="${formattedPrices[__${iStat.index}__]}"></span>đ
+								</p>
+
+							</div>
+							<span
+								th:if="${bookQuantityMap.get(book.getId().toString()) == 0}"
+								style="color: red; font-weight: bold;">Hết hàng</span> <span
+								th:if="${bookQuantityMap.get(book.getId().toString()) != 0}"
+								style="visibility: hidden;">Hết hàng</span>
+							<div class="row text-center pt-3">
+								<div class="col-6" th:if="${param.userName == null}">
+									<a th:href="@{/home/login}" class="btn btn-danger btn-sm ml-1"
+										th:if="${bookQuantityMap.get(book.getId().toString()) != 0}"><i
+										class="fa-solid fa-cart-shopping"></i>Add cart</a>
+								</div>
+								<div class="col-6" th:if="${param.userName != null}">
+									<button onclick="addToCart(this)"
+										class="btn btn-danger btn-sm ml-1"
+										th:attr="data-book-id=${book.getId()}, data-book-name=${book.getName()}, data-book-image=${book.getImage()}, data-book-author=${book.getAuthor_name()},	data-book-price=${book.getPrice()}"
+										th:if="${bookQuantityMap.get(book.getId().toString()) != 0}">
+										<i class="fa-solid fa-cart-shopping"></i>Add cart
+									</button>
+								</div>
+								<div class="col-6">
+									<a style="color: #ffff" th:with="username=${param.userName}"
+										th:attr="data-book-id=${book.getId()}, data-user-name=${username != null ? username : ''}"
+										onclick="navigateToBookDetail(this)"
+										class="btn btn-success btn-sm ml-2">View Details</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<th:block th:include=".././static/component/footer.html"></th:block>
+	<!-- Message -->
+	<div id="notification" class="notification">Book added to cart.</div>
+
+	<!-- Code javascript -->
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script>
+	$(document).ready(function() {
+	    $("#sort").change(function() {
+	        var sortBy = $(this).val();
+	        sortBooks(sortBy);
+	    });
+	});
+
+	function sortBooks(criteria) {
+	    var bookCards = $(".book-card");
+
+	    bookCards.sort(function(a, b) {
+	        var aValue, bValue;
+
+	        if (criteria.startsWith("name")) {
+	            aValue = $(a).find(".book-title").text().trim().toLowerCase();
+	            bValue = $(b).find(".book-title").text().trim().toLowerCase();
+
+	            if (criteria.endsWith("desc")) {
+	                return bValue.localeCompare(aValue);
+	            } else {
+	                return aValue.localeCompare(bValue);
+	            }
+	        } else {
+	            aValue = parseFloat($(a).find(".book-price").text().replace("đ", "").trim().replace(",", "."));
+	            bValue = parseFloat($(b).find(".book-price").text().replace("đ", "").trim().replace(",", "."));
+
+	            if (criteria.endsWith("desc")) {
+	                return bValue - aValue;
+	            } else {
+	                return aValue - bValue;
+	            }
+	        }
+	    });
+
+	    $(".flex-container").html(bookCards);
+	    showPage(currentPage);
+	}
+
+
+
+
+	function navigateToBookDetail(element) {
+	    const bookId = element.getAttribute('data-book-id');
+	    const userName = element.getAttribute('data-user-name');
+	    let url = '/home/bookDetail?id=' + bookId;
+	    if (userName) {
+	        url += '&userName=' + userName;
+	    }
+	    window.location.href = url;
+	}
+	const itemsPerPage = 16;
+	let currentPage = 1;
+	const classicBooks = document.querySelectorAll('.book-card');
+	function showPage(page) {
+		const start = (page - 1) * itemsPerPage;
+		const end = start + itemsPerPage;
+	
+		classicBooks.forEach((book, index) => {
+		if (index >= start && index < end) {
+		book.style.display = 'block';
+		} else {
+		book.style.display = 'none';
+		}
+		});
+		}
+	
+		function createPagination() {
+		const numPages = Math.ceil(classicBooks.length / itemsPerPage);
+		const paginationElem = document.createElement('div');
+		paginationElem.className = 'pagination';
+	
+		for (let i = 1; i <= numPages; i++) {
+		const pageLink = document.createElement('a');
+		pageLink.href = 'javascript:void(0);';
+		pageLink.innerHTML = i;
+		if (i === currentPage) {
+			  pageLink.classList.add('active');
+			}
+	
+			pageLink.addEventListener('click', function () {
+			  currentPage = i;
+			  showPage(currentPage);
+	
+			  const currentActive = document.querySelector('.pagination a.active');
+			  currentActive.classList.remove('active');
+			  this.classList.add('active');
+			});
+	
+			paginationElem.appendChild(pageLink);
+		}
+		document.querySelector('.container.text-center').appendChild(paginationElem);
+		}
+		function showToast() {
+			var notification = document.getElementById("notification");
+			notification.style.display = "block";
+			setTimeout(function() {
+				notification.style.display = "none";
+			}, 3000);
+		}
+		showPage(currentPage);
+		createPagination();
+		
+		function addToCart(element) {
+	const userName = getParameterByName('userName');
+	const bookId = element.getAttribute('data-book-id');
+	const bookName = element.getAttribute('data-book-name');
+	const bookImage = element.getAttribute('data-book-image');
+	const bookAuthor = element.getAttribute('data-book-author');
+	const bookPrice = element.getAttribute('data-book-price');
+	
+	const book = {
+	    id: bookId,
+	    name: bookName,
+	    image: bookImage,
+	    author: bookAuthor,
+	    price: bookPrice,
+	    quantity: 1
+	};
+	
+	storeBookInLocalStorage(book, userName);
+	showToast();
+	}
+		function storeBookInLocalStorage(book, userName) {
+		    // Thay đổi khóa để kết hợp với userName, ví dụ: booksInCart_userName123
+		    let key = 'booksInCart_' + userName;
+		    let booksInCart = JSON.parse(localStorage.getItem(key)) || [];
+		    
+		    // Kiểm tra xem sách đã có trong giỏ hàng chưa
+		    let existingBookIndex = booksInCart.findIndex(item => item.id === book.id);
+
+		    // Nếu sách đã có trong giỏ hàng, cập nhật số lượng
+		    if (existingBookIndex !== -1) {
+		        booksInCart[existingBookIndex].quantity += book.quantity;
+		    } else {
+		        // Nếu sách chưa có trong giỏ hàng, thêm sách vào giỏ hàng
+		        booksInCart.push(book);
+		    }
+		    
+		    localStorage.setItem(key, JSON.stringify(booksInCart));
+		}
+		function getParameterByName(name, url) {
+			  if (!url) url = window.location.href;
+			  name = name.replace(/[\[\]]/g, '\\$&');
+			  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+			      results = regex.exec(url);
+			  if (!results) return null;
+			  if (!results[2]) return '';
+			  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+			}
+	</script>
+</body>
+</html>

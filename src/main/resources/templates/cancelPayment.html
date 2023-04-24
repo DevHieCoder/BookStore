@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>OrderSuccess</title>
+<th:block th:include=".././static/component/allCSS.html"></th:block>
+</head>
+<body style="background-color: #f7f7f7;">
+	<th:block th:include=".././static/component/navbar.html"></th:block>
+
+	<div class="container text-center mt-3" th:with="userNameParam=${param.userName}">
+		<i class="fa-solid fa-x fa-5x text-danger"></i>	
+		<h1>Your Order Failed</h1>
+		<a th:href="@{/home} + ${userNameParam != null ? '?userName=' + userNameParam : ''}" class="btn btn-primary mt-3">Home</a>
+	</div>
+
+</body>
+</html>
