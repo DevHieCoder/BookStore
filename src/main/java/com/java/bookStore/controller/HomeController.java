@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -68,7 +69,9 @@ public class HomeController {
 		try {
 			Book[] allBooks = mapper.readValue(responeBooks, Book[].class);
 			BookStock[] bookQuantity = mapper.readValue(responeQuantity, BookStock[].class);
-			
+			for (BookStock bookStock : bookQuantity) {
+				System.out.println("id: " + bookStock.getId_book() + ", quantity: " + bookStock.getQuantity());
+			}
 //			Get book by category
 			List<String> categories = Arrays.asList("Classic Books", "Romance", "Kids", "Thrillers");
 			Map<String, List<Book>> booksByCategory = new HashMap<>();
@@ -87,7 +90,7 @@ public class HomeController {
 			
 //			Kiểm tra quantity của book
 			Map<String, Integer> bookQuantityMap = getBookQuantityMap(bookQuantity);
-			
+			System.out.println("aaaaa" + bookQuantityMap);
 			andView.addObject("bookQuantityMap", bookQuantityMap);
 			andView.addObject("formattedPrices", formattedPrices);
 			andView.addObject("booksByCategory", booksByCategory);
